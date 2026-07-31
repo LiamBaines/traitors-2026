@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traitors Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #15171b;
+    --surface: #1c1f25;
+    --surface-2: #242832;
+    --border: #2d323d;
+    --text: #eeece7;
+    --text-dim: #9299a6;
+    --gold: #c6a15b;
+    --gold-bright: #e2c07f;
+    --gold-faint: rgba(198,161,91,0.12);
+    --radius: 18px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body{
+    background:
+      radial-gradient(circle at 50% -10%, var(--gold-faint), transparent 55%),
+      var(--bg);
+    display:flex;
+    justify-content:center;
+    padding: 32px 16px;
+  }
+
+  .app-frame{
+    width:100%;
+    max-width:440px;
+    min-height:560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 32px 28px 28px;
+    display:flex;
+    flex-direction:column;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+  }
+
+  .screen{ display:none; flex-direction:column; flex:1; }
+  .screen.active{ display:flex; }
+
+  /* ---------- Home screen ---------- */
+
+  .eyebrow{
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  h1{
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.9rem;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+  }
+
+  .home-subtitle{
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    margin: 0 0 28px;
+  }
+
+  .tool-list{
+    display:flex;
+    flex-direction:column;
+    border-top: 1px solid var(--border);
+  }
+
+  .tool-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    width:100%;
+    background:none;
+    border:none;
+    border-bottom: 1px solid var(--border);
+    padding: 18px 4px;
+    text-align:left;
+    cursor:pointer;
+    color: var(--text);
+    font-family:inherit;
+    border-left: 2px solid transparent;
+    transition: border-left-color .15s ease, padding-left .15s ease, background-color .15s ease;
+  }
+
+  .tool-row:hover, .tool-row:focus-visible{
+    border-left-color: var(--gold);
+    padding-left: 14px;
+    background-color: rgba(255,255,255,0.02);
+  }
+
+  .tool-row-text{ display:flex; flex-direction:column; gap:2px; }
+
+  .tool-row-label{ font-size: 1rem; font-weight: 600; }
+
+  .tool-row-desc{ font-size: 0.82rem; color: var(--text-dim); }
+
+  .tool-row-arrow{
+    font-family:'IBM Plex Mono', monospace;
+    color: var(--gold);
+    font-size: 1.1rem;
+    flex-shrink:0;
+  }
+
+  /* ---------- Tool screen ---------- */
+
+  .tool-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 28px;
+  }
+
+  .back-btn{
+    background:none;
+    border:none;
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    cursor:pointer;
+    padding: 6px 8px 6px 0;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition: color .15s ease;
+  }
+  .back-btn:hover, .back-btn:focus-visible{ color: var(--text); }
+
+  .tool-title{
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+
+  #tool-body{
+    display:flex;
+    flex-direction:column;
+    flex:1;
+    justify-content:center;
+    gap: 22px;
+  }
+
+  /* ---------- Shared: the reveal plaque ---------- */
+
+  .plaque{
+    position:relative;
+    background: var(--surface-2);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 34px 24px;
+    text-align:center;
+    overflow:hidden;
+  }
+
+  .plaque::before{
+    content:"";
+    position:absolute;
+    inset: 5px;
+    border: 1px solid rgba(198,161,91,0.35);
+    border-radius: calc(var(--radius) - 6px);
+    pointer-events:none;
+  }
+
+  .plaque-eyebrow{
+    margin:0 0 10px;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .plaque-text{
+    margin:0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .plaque-text.mono{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2rem;
+    letter-spacing: 0.02em;
+  }
+
+  .reveal-pop{ animation: revealPop .32s ease; }
+  @keyframes revealPop{
+    0%{ transform: scale(0.96); opacity: 0.4; }
+    100%{ transform: scale(1); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .reveal-pop{ animation: none; }
+  }
+
+  /* ---------- Controls ---------- */
+
+  .param-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 16px;
+  }
+
+  .param-row.two-col{ gap: 20px; }
+
+  .param-label{
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+
+  .field{ display:flex; flex-direction:column; gap:6px; align-items:center; }
+
+  .field input{
+    width: 84px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    text-align:center;
+    border-radius: 10px;
+    padding: 8px 6px;
+  }
+  .field input:focus-visible{ outline: 2px solid var(--gold-bright); outline-offset:1px; }
+
+  .stepper{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 8px;
+  }
+
+  .stepper-btn{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--gold);
+    font-size: 1.1rem;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: background-color .15s ease, opacity .15s ease;
+  }
+  .stepper-btn:hover:not(:disabled){ background: var(--gold-faint); }
+  .stepper-btn:disabled{ opacity: 0.3; cursor:default; }
+  .stepper-btn:focus-visible{ outline: 2px solid var(--gold-bright); outline-offset:2px; }
+
+  .stepper-value{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 1.05rem;
+    min-width: 18px;
+    text-align:center;
+  }
+
+  /* ---------- Buttons ---------- */
+
+  .actions{ display:flex; }
+
+  .btn-primary{
+    width:100%;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold-bright);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 13px 16px;
+    border-radius: 12px;
+    cursor:pointer;
+    transition: background-color .15s ease, color .15s ease;
+  }
+  .btn-primary:hover, .btn-primary:focus-visible{
+    background: var(--gold);
+    color: #1a1a1a;
+  }
+  .btn-primary:focus-visible{ outline: 2px solid var(--gold-bright); outline-offset:2px; }
+
+  @media (max-width: 380px){
+    .app-frame{ padding: 26px 20px 22px; }
+    .plaque-text.mono{ font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-frame">
+
+  <!-- ================= HOME SCREEN ================= -->
+  <section id="screen-home" class="screen active">
+    <p class="eyebrow">Erasmus Cinematic Universe</p>
+    <h1>Traitors Toolkit</h1>
+    <p class="home-subtitle">Pick a tool to get started.</p>
+    <nav class="tool-list" id="tool-list"><!-- populated from TOOLS array --></nav>
+  </section>
+
+  <!-- ================= TOOL SCREEN (shared shell) ================= -->
+  <section id="screen-tool" class="screen">
+    <div class="tool-header">
+      <button class="back-btn" id="back-btn">&larr; Back</button>
+      <span class="tool-title" id="tool-title"></span>
+      <span style="width:40px"></span>
+    </div>
+    <div id="tool-body"><!-- populated by the active tool's mount() --></div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================================
+   DATA
+   Hard-coded content lives here. Add more entries any time — no other
+   code needs to change.
+   ========================================================================= */
+
+const CATEGORIES = [
+  "Countries in Asia", "Countries in Africa", "Premier League football clubs",
+  "Harry Potter characters", "Disney animated films", "Types of pasta",
+  "Types of cheese", "Dog breeds", "Colours of the rainbow", "US state capitals",
+  "Cities in the UK", "Superheroes", "James Bond films", "Classic board games",
+  "Pizza toppings", "Types of fruit", "Types of vegetable", "Musical instruments",
+  "Card games", "Olympic sports", "90s sitcoms", "Types of tea",
+  "Star signs of the zodiac", "Types of dance", "Famous painters",
+  "Types of shark", "British sitcoms", "Fairy tale characters", "Types of whisky",
+  "Elements on the periodic table", "Types of sandwich", "World capital cities",
+  "Types of dinosaur", "Ice cream flavours", "Types of tree"
+];
+
+// Words grouped by letter count, so the word tool can filter by length.
+const WORD_BANK = {
+  3: ["cat","dog","run","sun","fox","owl","bee","ant","bat","fly","ice","jar","key","leg","map","net","oar","pen","rat","sky","top","cup","bag","box","pie"],
+  4: ["frog","lion","wolf","bear","deer","swan","crow","hawk","moth","wasp","seal","walk","jump","gold","blue","pink","lime","dust","rock","sand","moon","star","leaf","rain","snow"],
+  5: ["eagle","tiger","zebra","horse","camel","sheep","otter","mouse","snake","shark","whale","heron","finch","robin","viper","llama","koala","panda","gecko","moose","cloud","storm","beach","river","mount"],
+  6: ["rabbit","monkey","donkey","turtle","beaver","badger","weasel","dragon","falcon","spider","salmon","cougar","jaguar","rocket","wizard","castle","bridge","garden","forest","meadow","island","canyon","desert","jungle","tunnel"],
+  7: ["giraffe","leopard","buffalo","raccoon","peacock","sparrow","gorilla","panther","dolphin","penguin","octopus","volcano","glacier","village","harbour","compass","diamond","emerald","fortune","journey","library","meeting","package","rainbow","theatre"],
+  8: ["elephant","squirrel","dinosaur","mountain","treasure","festival","sandwich","aquarium","building","champion","currency","daughter","envelope","firework","hospital","keyboard","language","medicine","notebook","painting","question","sentence","umbrella","vacation","wardrobe"],
+  9: ["chocolate","telephone","butterfly","adventure","astronaut","beautiful","calculate","continent","crocodile","dashboard","delicious","direction","education","fireplace","furniture","gymnastic","handshake","important","landscape","lightning","mechanism","microwave","newspaper","orchestra","passenger","sculpture","telescope","vegetable","waterfall"],
+  10: ["basketball","binoculars","watermelon","playground","strawberry","television","volleyball","understand","background","friendship","helicopter","motorcycle","photograph","restaurant","university","assignment","automobile","chandelier","complicate","dictionary","earthquake","instrument"]
+};
+
+/* =========================================================================
+   SHARED HELPERS
+   ========================================================================= */
+
+// Remembers the last result per tool, so "generate" avoids an immediate repeat.
+const state = { lastCategory: null, lastWord: null, lastWordLength: 5, lastNumber: null, lastMin: 1, lastMax: 10 };
+
+function randomIndexExcluding(length, excludeIndex) {
+  if (length <= 1) return 0;
+  let i;
+  do { i = Math.floor(Math.random() * length); } while (i === excludeIndex);
+  return i;
+}
+
+// Small "reveal" animation on the plaque, skipped entirely for reduced-motion users.
+function flashReveal(el) {
+  if (!el) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+  el.classList.remove('reveal-pop');
+  void el.offsetWidth; // restart animation
+  el.classList.add('reveal-pop');
+}
+
+function plaqueHTML(eyebrow, id, extraClass) {
+  return `
+    <div class="plaque" aria-live="polite">
+      <p class="plaque-eyebrow">${eyebrow}</p>
+      <p class="plaque-text ${extraClass || ''}" id="${id}">—</p>
+    </div>`;
+}
+
+/* =========================================================================
+   TOOLS REGISTRY
+   -------------------------------------------------------------------------
+   To add a new widget: push a new object onto this array with a unique id,
+   a label + description for the home screen, and a mount(body) function
+   that fills the tool screen and wires up its own controls. Nothing else
+   in the file needs to change — the home screen and navigation are both
+   generated from this list.
+   ========================================================================= */
+
+const TOOLS = [
+  {
+    id: 'categories',
+    label: 'Categories',
+    description: 'Reveal a random category',
+    mount(body) {
+      body.innerHTML = plaqueHTML('Category', 'cat-text') + `
+        <div class="actions"><button class="btn-primary" id="cat-new">New category</button></div>`;
+
+      function generate() {
+        const idx = randomIndexExcluding(CATEGORIES.length, state.lastCategory);
+        state.lastCategory = idx;
+        document.getElementById('cat-text').textContent = CATEGORIES[idx];
+        flashReveal(body.querySelector('.plaque'));
+      }
+
+      document.getElementById('cat-new').addEventListener('click', generate);
+      generate();
+    }
+  },
+
+  {
+    id: 'numbers',
+    label: 'Number generator',
+    description: 'Roll a random number within a range',
+    mount(body) {
+      body.innerHTML = `
+        <div class="param-row two-col">
+          <label class="field"><span class="param-label">Min</span>
+            <input type="number" id="num-min" value="${state.lastMin}" step="1">
+          </label>
+          <label class="field"><span class="param-label">Max</span>
+            <input type="number" id="num-max" value="${state.lastMax}" step="1">
+          </label>
+        </div>
+        ${plaqueHTML('Number', 'num-text', 'mono')}
+        <div class="actions"><button class="btn-primary" id="num-new">New number</button></div>`;
+
+      function generate() {
+        const minInput = document.getElementById('num-min');
+        const maxInput = document.getElementById('num-max');
+        let a = parseInt(minInput.value, 10);
+        let b = parseInt(maxInput.value, 10);
+        if (isNaN(a)) a = state.lastMin;
+        if (isNaN(b)) b = state.lastMax;
+        if (a > b) { [a, b] = [b, a]; }
+        minInput.value = a;
+        maxInput.value = b;
+        state.lastMin = a;
+        state.lastMax = b;
+
+        const range = b - a + 1;
+        let n;
+        do { n = a + Math.floor(Math.random() * range); } while (range > 1 && n === state.lastNumber);
+        state.lastNumber = n;
+        document.getElementById('num-text').textContent = n;
+        flashReveal(body.querySelector('.plaque'));
+      }
+
+      document.getElementById('num-new').addEventListener('click', generate);
+      generate();
+    }
+  },
+
+  {
+    id: 'words',
+    label: 'Word generator',
+    description: 'Generate a random word of a chosen length',
+    mount(body) {
+      const lengths = Object.keys(WORD_BANK).map(Number).sort((a, b) => a - b);
+      let length = lengths.includes(state.lastWordLength) ? state.lastWordLength : lengths[0];
+
+      body.innerHTML = `
+        <div class="param-row">
+          <span class="param-label">Letters</span>
+          <div class="stepper">
+            <button class="stepper-btn" id="len-dec" aria-label="Fewer letters">&minus;</button>
+            <span class="stepper-value" id="len-value">${length}</span>
+            <button class="stepper-btn" id="len-inc" aria-label="More letters">+</button>
+          </div>
+        </div>
+        ${plaqueHTML('Word', 'word-text', 'mono')}
+        <div class="actions"><button class="btn-primary" id="word-new">New word</button></div>`;
+
+      const decBtn = document.getElementById('len-dec');
+      const incBtn = document.getElementById('len-inc');
+      const lenValue = document.getElementById('len-value');
+
+      function refreshStepperButtons() {
+        decBtn.disabled = length <= lengths[0];
+        incBtn.disabled = length >= lengths[lengths.length - 1];
+        lenValue.textContent = length;
+      }
+
+      function generate() {
+        const bank = WORD_BANK[length];
+        const idx = randomIndexExcluding(bank.length, bank.indexOf(state.lastWord));
+        state.lastWord = bank[idx];
+        state.lastWordLength = length;
+        document.getElementById('word-text').textContent = bank[idx];
+        flashReveal(body.querySelector('.plaque'));
+      }
+
+      decBtn.addEventListener('click', () => {
+        const i = lengths.indexOf(length);
+        if (i > 0) { length = lengths[i - 1]; refreshStepperButtons(); }
+      });
+      incBtn.addEventListener('click', () => {
+        const i = lengths.indexOf(length);
+        if (i < lengths.length - 1) { length = lengths[i + 1]; refreshStepperButtons(); }
+      });
+      document.getElementById('word-new').addEventListener('click', generate);
+
+      refreshStepperButtons();
+      generate();
+    }
+  }
+
+  // Add new tools anywhere in this array — the home list re-sorts
+  // alphabetically by label, so ordering here doesn't matter.
+];
+
+TOOLS.sort((a, b) => a.label.localeCompare(b.label));
+
+/* =========================================================================
+   NAVIGATION
+   ========================================================================= */
+
+function renderHomeList() {
+  const list = document.getElementById('tool-list');
+  list.innerHTML = TOOLS.map(t => `
+    <button class="tool-row" data-id="${t.id}">
+      <span class="tool-row-text">
+        <span class="tool-row-label">${t.label}</span>
+        <span class="tool-row-desc">${t.description}</span>
+      </span>
+      <span class="tool-row-arrow">&rarr;</span>
+    </button>`).join('');
+
+  list.querySelectorAll('.tool-row').forEach(btn => {
+    btn.addEventListener('click', () => openTool(btn.dataset.id));
+  });
+}
+
+function openTool(id) {
+  const tool = TOOLS.find(t => t.id === id);
+  if (!tool) return;
+  document.getElementById('screen-home').classList.remove('active');
+  document.getElementById('screen-tool').classList.add('active');
+  document.getElementById('tool-title').textContent = tool.label;
+  const body = document.getElementById('tool-body');
+  body.innerHTML = '';
+  tool.mount(body);
+}
+
+function goHome() {
+  document.getElementById('screen-tool').classList.remove('active');
+  document.getElementById('screen-home').classList.add('active');
+}
+
+document.getElementById('back-btn').addEventListener('click', goHome);
+renderHomeList();
+</script>
+</body>
+</html>
