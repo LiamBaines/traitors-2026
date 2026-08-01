@@ -26,10 +26,11 @@
   html, body{
     margin:0;
     padding:0;
-    min-height:100%;
+    height:100%;
     background: var(--bg);
     color: var(--text);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow:hidden;
   }
 
   body{
@@ -37,55 +38,64 @@
       radial-gradient(circle at 50% -10%, var(--gold-faint), transparent 55%),
       var(--bg);
     display:flex;
+    align-items:center;
     justify-content:center;
-    padding: 32px 16px;
+    height: 100vh;
+    height: 100dvh;
+    padding: clamp(10px, 3vmin, 32px) clamp(10px, 4vmin, 16px);
   }
 
   .app-frame{
     width:100%;
     max-width:440px;
-    min-height:560px;
+    height:100%;
+    max-height:720px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 24px;
-    padding: 32px 28px 28px;
+    padding: clamp(16px, 4.5vmin, 32px) clamp(16px, 5vmin, 28px) clamp(14px, 4vmin, 28px);
     display:flex;
     flex-direction:column;
+    min-height:0;
     box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+    overflow-y:auto;
+    overflow-x:hidden;
   }
 
-  .screen{ display:none; flex-direction:column; flex:1; }
+  .screen{ display:none; flex-direction:column; flex:1; min-height:0; }
   .screen.active{ display:flex; }
 
   /* ---------- Home screen ---------- */
 
   .eyebrow{
-    font-size: 0.72rem;
+    font-size: clamp(0.62rem, 2vmin, 0.72rem);
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--gold);
     font-weight: 600;
-    margin: 0 0 8px;
+    margin: 0 0 clamp(4px, 1.4vmin, 8px);
   }
 
   h1{
     font-family: 'Fraunces', Georgia, serif;
     font-weight: 600;
-    font-size: 1.9rem;
+    font-size: clamp(1.3rem, 5.5vmin, 1.9rem);
     letter-spacing: -0.01em;
     margin: 0 0 4px;
   }
 
   .home-subtitle{
     color: var(--text-dim);
-    font-size: 0.92rem;
-    margin: 0 0 28px;
+    font-size: clamp(0.8rem, 2.2vmin, 0.92rem);
+    margin: 0 0 clamp(12px, 4vmin, 28px);
   }
 
   .tool-list{
     display:flex;
     flex-direction:column;
     border-top: 1px solid var(--border);
+    min-height:0;
+    overflow-y:auto;
   }
 
   .tool-row{
@@ -97,7 +107,7 @@
     background:none;
     border:none;
     border-bottom: 1px solid var(--border);
-    padding: 18px 4px;
+    padding: clamp(10px, 2.6vmin, 18px) 4px;
     text-align:left;
     cursor:pointer;
     color: var(--text);
@@ -112,11 +122,11 @@
     background-color: rgba(255,255,255,0.02);
   }
 
-  .tool-row-text{ display:flex; flex-direction:column; gap:2px; }
+  .tool-row-text{ display:flex; flex-direction:column; gap:2px; min-width:0; }
 
-  .tool-row-label{ font-size: 1rem; font-weight: 600; }
+  .tool-row-label{ font-size: clamp(0.9rem, 2.4vmin, 1rem); font-weight: 600; }
 
-  .tool-row-desc{ font-size: 0.82rem; color: var(--text-dim); }
+  .tool-row-desc{ font-size: clamp(0.74rem, 2vmin, 0.82rem); color: var(--text-dim); }
 
   .tool-row-arrow{
     font-family:'IBM Plex Mono', monospace;
@@ -132,8 +142,9 @@
     align-items:center;
     justify-content:space-between;
     border-bottom: 1px solid var(--border);
-    padding-bottom: 16px;
-    margin-bottom: 28px;
+    padding-bottom: clamp(8px, 2.2vmin, 16px);
+    margin-bottom: clamp(12px, 3.5vmin, 28px);
+    flex-shrink:0;
   }
 
   .back-btn{
@@ -152,7 +163,7 @@
   .back-btn:hover, .back-btn:focus-visible{ color: var(--text); }
 
   .tool-title{
-    font-size: 0.74rem;
+    font-size: clamp(0.68rem, 1.9vmin, 0.74rem);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--text-dim);
@@ -163,8 +174,22 @@
     display:flex;
     flex-direction:column;
     flex:1;
+    min-height:0;
     justify-content:center;
-    gap: 22px;
+    gap: clamp(12px, 3vmin, 22px);
+  }
+
+  /* Each tool's mount() wraps its inputs in .tool-controls and its
+     plaque+action button in .tool-reveal. In portrait these just stack;
+     in landscape (see media query below) they sit side by side. */
+  .tool-controls,
+  .tool-reveal{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap: clamp(12px, 3vmin, 22px);
+    min-width:0;
+    min-height:0;
   }
 
   /* ---------- Shared: the reveal plaque ---------- */
@@ -174,9 +199,10 @@
     background: var(--surface-2);
     border: 1px solid var(--gold);
     border-radius: var(--radius);
-    padding: 34px 24px;
+    padding: clamp(18px, 5.5vmin, 34px) clamp(14px, 4.5vmin, 24px);
     text-align:center;
     overflow:hidden;
+    flex-shrink:0;
   }
 
   .plaque::before{
@@ -201,14 +227,14 @@
     margin:0;
     font-family: 'Fraunces', Georgia, serif;
     font-weight: 600;
-    font-size: 1.5rem;
+    font-size: clamp(1.1rem, 4.8vmin, 1.5rem);
     line-height: 1.3;
     word-break: break-word;
   }
 
   .plaque-text.mono{
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 2rem;
+    font-size: clamp(1.4rem, 6.2vmin, 2rem);
     letter-spacing: 0.02em;
   }
 
@@ -251,7 +277,7 @@
     font-size: 1rem;
     text-align:center;
     border-radius: 10px;
-    padding: 8px 6px;
+    padding: clamp(6px, 1.8vmin, 8px) 6px;
   }
   .field input:focus-visible{ outline: 2px solid var(--gold-bright); outline-offset:1px; }
 
@@ -262,7 +288,7 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 999px;
-    padding: 6px 8px;
+    padding: clamp(4px, 1.2vmin, 6px) 8px;
   }
 
   .stepper-btn{
@@ -297,13 +323,14 @@
 
   .btn-primary{
     width:100%;
+    flex-shrink:0;
     background: transparent;
     border: 1px solid var(--gold);
     color: var(--gold-bright);
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 0.92rem;
-    padding: 13px 16px;
+    font-size: clamp(0.84rem, 2.3vmin, 0.92rem);
+    padding: clamp(10px, 2.8vmin, 13px) 16px;
     border-radius: 12px;
     cursor:pointer;
     transition: background-color .15s ease, color .15s ease;
@@ -351,8 +378,14 @@
   .name-list{
     display:flex;
     flex-wrap:wrap;
+    align-content:flex-start;
     gap:8px;
+    max-height: clamp(70px, 22vh, 160px);
+    overflow-y:auto;
+    padding-right:2px;
   }
+
+  .name-add-row{ flex-shrink:0; }
 
   .name-item{
     display:inline-flex;
@@ -389,9 +422,61 @@
     margin:0;
   }
 
-  @media (max-width: 380px){
+  @media (max-width: 380px) and (orientation: portrait){
     .app-frame{ padding: 26px 20px 22px; }
-    .plaque-text.mono{ font-size: 1.7rem; }
+  }
+
+  /* ---------- Landscape (phones turned sideways) ----------
+     Short viewport height is the constraint here, not width, so we
+     widen the card and lay content out in columns instead of stacking
+     everything, which is what was forcing a scroll before. */
+  @media (orientation: landscape) and (max-height: 600px){
+
+    body{ padding: clamp(6px, 2vmin, 16px); }
+
+    .app-frame{
+      max-width: 780px;
+      max-height: 100%;
+      padding: clamp(12px, 3.5vmin, 22px) clamp(20px, 4vmin, 32px);
+    }
+
+    .eyebrow{ margin-bottom: clamp(2px, 1vmin, 4px); }
+    h1{ font-size: clamp(1.1rem, 5.5vmin, 1.4rem); margin-bottom: 2px; }
+    .home-subtitle{ margin-bottom: clamp(8px, 2.5vmin, 14px); }
+
+    /* Home list: two columns so four+ tools fit without scrolling */
+    .tool-list{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 24px;
+      border-top:none;
+      overflow-y:auto;
+    }
+    .tool-row{
+      border-top: 1px solid var(--border);
+      border-bottom: none;
+      padding: clamp(8px, 2.2vmin, 14px) 4px;
+    }
+    .tool-row-desc{ display:none; }
+
+    .tool-header{ padding-bottom: clamp(6px, 1.6vmin, 10px); margin-bottom: clamp(8px, 2vmin, 14px); }
+
+    /* Tool body: controls on one side, the reveal + action on the
+       other, so nothing has to stack (and scroll) vertically. */
+    #tool-body{
+      flex-direction:row;
+      align-items:center;
+      gap: clamp(18px, 4vmin, 36px);
+    }
+    .tool-controls,
+    .tool-reveal{
+      flex:1;
+      gap: clamp(8px, 2vmin, 14px);
+    }
+    .tool-controls{ overflow-y:auto; padding-right:2px; }
+
+    .plaque{ padding: clamp(12px, 4vmin, 22px) clamp(12px, 4vmin, 20px); }
+    .name-list{ max-height: clamp(60px, 30vh, 130px); }
   }
 </style>
 </head>
@@ -505,8 +590,10 @@ const TOOLS = [
     label: 'Categories',
     description: 'Reveal a random category',
     mount(body) {
-      body.innerHTML = plaqueHTML('Category', 'cat-text') + `
-        <div class="actions"><button class="btn-primary" id="cat-new">New category</button></div>`;
+      body.innerHTML = `<div class="tool-reveal">
+        ${plaqueHTML('Category', 'cat-text')}
+        <div class="actions"><button class="btn-primary" id="cat-new">New category</button></div>
+      </div>`;
 
       function generate() {
         const idx = randomIndexExcluding(CATEGORIES.length, state.lastCategory);
@@ -526,16 +613,20 @@ const TOOLS = [
     description: 'Roll a random number within a range',
     mount(body) {
       body.innerHTML = `
-        <div class="param-row two-col">
-          <label class="field"><span class="param-label">Min</span>
-            <input type="number" id="num-min" value="${state.lastMin}" step="1">
-          </label>
-          <label class="field"><span class="param-label">Max</span>
-            <input type="number" id="num-max" value="${state.lastMax}" step="1">
-          </label>
+        <div class="tool-controls">
+          <div class="param-row two-col">
+            <label class="field"><span class="param-label">Min</span>
+              <input type="number" id="num-min" value="${state.lastMin}" step="1">
+            </label>
+            <label class="field"><span class="param-label">Max</span>
+              <input type="number" id="num-max" value="${state.lastMax}" step="1">
+            </label>
+          </div>
         </div>
-        ${plaqueHTML('Number', 'num-text', 'mono')}
-        <div class="actions"><button class="btn-primary" id="num-new">New number</button></div>`;
+        <div class="tool-reveal">
+          ${plaqueHTML('Number', 'num-text', 'mono')}
+          <div class="actions"><button class="btn-primary" id="num-new">New number</button></div>
+        </div>`;
 
       function generate() {
         const minInput = document.getElementById('num-min');
@@ -572,16 +663,20 @@ const TOOLS = [
       let length = lengths.includes(state.lastWordLength) ? state.lastWordLength : lengths[0];
 
       body.innerHTML = `
-        <div class="param-row">
-          <span class="param-label">Letters</span>
-          <div class="stepper">
-            <button class="stepper-btn" id="len-dec" aria-label="Fewer letters">&minus;</button>
-            <span class="stepper-value" id="len-value">${length}</span>
-            <button class="stepper-btn" id="len-inc" aria-label="More letters">+</button>
+        <div class="tool-controls">
+          <div class="param-row">
+            <span class="param-label">Letters</span>
+            <div class="stepper">
+              <button class="stepper-btn" id="len-dec" aria-label="Fewer letters">&minus;</button>
+              <span class="stepper-value" id="len-value">${length}</span>
+              <button class="stepper-btn" id="len-inc" aria-label="More letters">+</button>
+            </div>
           </div>
         </div>
-        ${plaqueHTML('Word', 'word-text', 'mono')}
-        <div class="actions"><button class="btn-primary" id="word-new">New word</button></div>`;
+        <div class="tool-reveal">
+          ${plaqueHTML('Word', 'word-text', 'mono')}
+          <div class="actions"><button class="btn-primary" id="word-new">New word</button></div>
+        </div>`;
 
       const decBtn = document.getElementById('len-dec');
       const incBtn = document.getElementById('len-inc');
@@ -623,13 +718,17 @@ const TOOLS = [
     description: 'Randomly pick one name from your list',
     mount(body) {
       body.innerHTML = `
-        <div class="name-add-row">
-          <input type="text" id="name-input" placeholder="Add a name" maxlength="40">
-          <button class="btn-add" id="name-add">Add</button>
+        <div class="tool-controls">
+          <div class="name-add-row">
+            <input type="text" id="name-input" placeholder="Add a name" maxlength="40">
+            <button class="btn-add" id="name-add">Add</button>
+          </div>
+          <div class="name-list" id="name-list"></div>
         </div>
-        <div class="name-list" id="name-list"></div>
-        ${plaqueHTML('Picked', 'name-text')}
-        <div class="actions"><button class="btn-primary" id="name-pick">Pick a name</button></div>`;
+        <div class="tool-reveal">
+          ${plaqueHTML('Picked', 'name-text')}
+          <div class="actions"><button class="btn-primary" id="name-pick">Pick a name</button></div>
+        </div>`;
 
       const STORAGE_KEY = 'traitors-toolkit:names';
 
