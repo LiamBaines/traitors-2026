@@ -179,9 +179,6 @@
     gap: clamp(12px, 3vmin, 22px);
   }
 
-  /* Each tool's mount() wraps its inputs in .tool-controls and its
-     plaque+action button in .tool-reveal. In portrait these just stack;
-     in landscape (see media query below) they sit side by side. */
   .tool-controls,
   .tool-reveal{
     display:flex;
@@ -190,6 +187,19 @@
     gap: clamp(12px, 3vmin, 22px);
     min-width:0;
     min-height:0;
+  }
+
+  /* Portrait order rule for name picker */
+  .tool-body-names {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(12px, 3vmin, 22px);
+  }
+  .tool-body-names .tool-reveal {
+    order: 1;
+  }
+  .tool-body-names .tool-controls {
+    order: 2;
   }
 
   /* ---------- Shared: the reveal plaque ---------- */
@@ -426,10 +436,7 @@
     .app-frame{ padding: 26px 20px 22px; }
   }
 
-  /* ---------- Landscape (phones turned sideways) ----------
-     Short viewport height is the constraint here, not width, so we
-     widen the card and lay content out in columns instead of stacking
-     everything, which is what was forcing a scroll before. */
+  /* ---------- Landscape (phones turned sideways) ---------- */
   @media (orientation: landscape) and (max-height: 600px){
 
     body{ padding: clamp(6px, 2vmin, 16px); }
@@ -461,11 +468,10 @@
 
     .tool-header{ padding-bottom: clamp(6px, 1.6vmin, 10px); margin-bottom: clamp(8px, 2vmin, 14px); }
 
-    /* Tool body: controls on one side, the reveal + action on the
-       other, so nothing has to stack (and scroll) vertically. */
     #tool-body{
       flex-direction:row;
       align-items:center;
+      justify-content:center;
       gap: clamp(18px, 4vmin, 36px);
     }
     .tool-controls,
@@ -477,6 +483,37 @@
 
     .plaque{ padding: clamp(12px, 4vmin, 22px) clamp(12px, 4vmin, 20px); }
     .name-list{ max-height: clamp(60px, 30vh, 130px); }
+
+    /* Large font rule for category, name, and number display in landscape */
+    .tool-body-categories .plaque-text,
+    .tool-body-names .plaque-text,
+    .tool-body-numbers .plaque-text.mono {
+      font-size: clamp(2rem, 9vmin, 3.2rem);
+    }
+
+    /* Landscape centering & element removal rules */
+    .tool-body-names .tool-controls,
+    .tool-body-numbers .tool-controls,
+    .tool-body-words .tool-controls {
+      display: none !important;
+    }
+
+    .tool-body-names,
+    .tool-body-numbers,
+    .tool-body-words {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .tool-body-names .tool-reveal,
+    .tool-body-numbers .tool-reveal,
+    .tool-body-words .tool-reveal {
+      width: 100%;
+      flex: 1;
+    }
   }
 </style>
 </head>
@@ -507,8 +544,6 @@
 <script>
 /* =========================================================================
    DATA
-   Hard-coded content lives here. Add more entries any time — no other
-   code needs to change.
    ========================================================================= */
 
 const CATEGORIES = [
@@ -524,7 +559,12 @@ const CATEGORIES = [
   "Types of dinosaur", "Ice cream flavours", "Types of tree"
 ];
 
-// Words grouped by letter count, so the word tool can filter by length.
+const LOCATIONS = [
+  "Casino", "Hospital", "Bank", "Airport", "Police Station", 
+  "Hotel", "Submarine", "Circus", "Cruise Ship", "Museum", 
+  "Restaurant", "Movie Studio", "Space Station", "Supermarket", "Theme Park"
+];
+
 const WORD_BANK = {
   3: ["cat","dog","run","sun","fox","owl","bee","ant","bat","fly","ice","jar","key","leg","map","net","oar","pen","rat","sky","top","cup","bag","box","pie"],
   4: ["frog","lion","wolf","bear","deer","swan","crow","hawk","moth","wasp","seal","walk","jump","gold","blue","pink","lime","dust","rock","sand","moon","star","leaf","rain","snow"],
@@ -540,8 +580,16 @@ const WORD_BANK = {
    SHARED HELPERS
    ========================================================================= */
 
-// Remembers the last result per tool, so "generate" avoids an immediate repeat.
-const state = { lastCategory: null, lastWord: null, lastWordLength: 5, lastNumber: null, lastMin: 1, lastMax: 10, lastNameIndex: null };
+const state = { 
+  lastCategory: null, 
+  lastLocation: null, 
+  lastWord: null, 
+  lastWordLength: 5, 
+  lastNumber: null, 
+  lastMin: 1, 
+  lastMax: 10, 
+  lastNameIndex: null 
+};
 
 function randomIndexExcluding(length, excludeIndex) {
   if (length <= 1) return 0;
@@ -550,13 +598,12 @@ function randomIndexExcluding(length, excludeIndex) {
   return i;
 }
 
-// Small "reveal" animation on the plaque, skipped entirely for reduced-motion users.
 function flashReveal(el) {
   if (!el) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) return;
   el.classList.remove('reveal-pop');
-  void el.offsetWidth; // restart animation
+  void el.offsetWidth;
   el.classList.add('reveal-pop');
 }
 
@@ -576,12 +623,6 @@ function plaqueHTML(eyebrow, id, extraClass) {
 
 /* =========================================================================
    TOOLS REGISTRY
-   -------------------------------------------------------------------------
-   To add a new widget: push a new object onto this array with a unique id,
-   a label + description for the home screen, and a mount(body) function
-   that fills the tool screen and wires up its own controls. Nothing else
-   in the file needs to change — the home screen and navigation are both
-   generated from this list.
    ========================================================================= */
 
 const TOOLS = [
@@ -590,6 +631,7 @@ const TOOLS = [
     label: 'Categories',
     description: 'Reveal a random category',
     mount(body) {
+      body.className = 'tool-body-categories';
       body.innerHTML = `<div class="tool-reveal">
         ${plaqueHTML('Category', 'cat-text')}
         <div class="actions"><button class="btn-primary" id="cat-new">New category</button></div>
@@ -608,10 +650,34 @@ const TOOLS = [
   },
 
   {
+    id: 'location',
+    label: 'Location picker',
+    description: 'Select a location at random',
+    mount(body) {
+      body.className = 'tool-body-categories';
+      body.innerHTML = `<div class="tool-reveal">
+        ${plaqueHTML('Location', 'loc-text')}
+        <div class="actions"><button class="btn-primary" id="loc-new">New location</button></div>
+      </div>`;
+
+      function generate() {
+        const idx = randomIndexExcluding(LOCATIONS.length, state.lastLocation);
+        state.lastLocation = idx;
+        document.getElementById('loc-text').textContent = LOCATIONS[idx];
+        flashReveal(body.querySelector('.plaque'));
+      }
+
+      document.getElementById('loc-new').addEventListener('click', generate);
+      generate();
+    }
+  },
+
+  {
     id: 'numbers',
     label: 'Number generator',
     description: 'Roll a random number within a range',
     mount(body) {
+      body.className = 'tool-body-numbers';
       body.innerHTML = `
         <div class="tool-controls">
           <div class="param-row two-col">
@@ -659,6 +725,7 @@ const TOOLS = [
     label: 'Word generator',
     description: 'Generate a random word of a chosen length',
     mount(body) {
+      body.className = 'tool-body-words';
       const lengths = Object.keys(WORD_BANK).map(Number).sort((a, b) => a - b);
       let length = lengths.includes(state.lastWordLength) ? state.lastWordLength : lengths[0];
 
@@ -717,17 +784,18 @@ const TOOLS = [
     label: 'Name picker',
     description: 'Randomly pick one name from your list',
     mount(body) {
+      body.className = 'tool-body-names';
       body.innerHTML = `
+        <div class="tool-reveal">
+          ${plaqueHTML('Picked', 'name-text')}
+          <div class="actions"><button class="btn-primary" id="name-pick">Pick a name</button></div>
+        </div>
         <div class="tool-controls">
           <div class="name-add-row">
             <input type="text" id="name-input" placeholder="Add a name" maxlength="40">
             <button class="btn-add" id="name-add">Add</button>
           </div>
           <div class="name-list" id="name-list"></div>
-        </div>
-        <div class="tool-reveal">
-          ${plaqueHTML('Picked', 'name-text')}
-          <div class="actions"><button class="btn-primary" id="name-pick">Pick a name</button></div>
         </div>`;
 
       const STORAGE_KEY = 'traitors-toolkit:names';
@@ -808,9 +876,6 @@ const TOOLS = [
       renderList();
     }
   }
-
-  // Add new tools anywhere in this array — the home list re-sorts
-  // alphabetically by label, so ordering here doesn't matter.
 ];
 
 TOOLS.sort((a, b) => a.label.localeCompare(b.label));
